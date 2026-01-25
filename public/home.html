@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - Home</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="welcome-overlay">
+    <div class="welcome-content">
+        <div class="welcome-text">Welcome to MediCart</div>
+        <div class="welcome-subtext">Your Health, Our Priority</div>
+    </div>
+</div>
+    <nav class="navbar">
+        <div class="logo">MediCart <span>+</span></div>
+        <ul class="nav-links">
+            <li><a href="home.html" class="active">Home</a></li>
+            <li><a href="reminders.html">Reminders</a></li> <li><a href="#">Chatbot</a></li>
+        </ul>
+
+        <div class="nav-search">
+            <input type="text" id="search-bar" placeholder="Search medicines..." aria-label="Search Medicines">
+        </div>
+
+        <div class="nav-user">
+            <span id="user-display">Hello, User</span>
+            <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+            
+            <a href="cart.html">
+                <div class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </div>
+            </a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-text">
+            <h1>Your Health, Our Priority</h1>
+            <p>Order medicines online and get them delivered to your doorstep.</p>
+            <button class="cta-btn" onclick="window.location.href='upload.html'">Upload Prescription</button>
+        </div>
+    </header>
+
+    <h2 class="section-title">Popular Medicines</h2>
+    <div class="product-grid" id="product-list">
+        </div> 
+
+    <script src="script.js"></script>
+
+<script>
+    // 1. Check Auth
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+        window.location.href = 'login.html';
+    } else {
+        document.getElementById('user-display').innerText = `Hello, ${user.firstName}`;
+        updateCartCount(); 
+    }
+
+    let allMedicines = []; 
+
+    // 2. Fetch & Render Medicines
+    async function loadProducts() {
+        const productList = document.getElementById('product-list');
+        try {
+            const response = await fetch('/api/products');
+            allMedicines = await response.json();
+            renderMedicines(allMedicines); 
+        } catch (error) {
+            console.error("Error loading products:", error);
+            productList.innerHTML = "<p>Failed to load medicines.</p>";
+        }
+    }
+
+    function renderMedicines(medicines) {
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = ''; 
+
+        if (medicines.length === 0) {
+            productList.innerHTML = '<p>No medicines found.</p>';
+            return;
+        }
+
+        medicines.forEach(med => {
+            const card = `
+                <div class="product-card">
+                    <img src="${med.image}" alt="${med.name}">
+                    <h3>${med.name}</h3>
+                    <p class="price">₹${med.price}</p>
+                    
+                    <div style="display: flex; justify-content: space-between;">
+                        <button class="add-btn" onclick="addToCart('${med._id}', '${med.name}', ${med.price}, '${med.image}')">
+                            Add
+                        </button>
+                        <button class="buy-btn" onclick="buyNow('${med._id}', '${med.name}', ${med.price}, '${med.image}')">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            productList.innerHTML += card;
+        });
+    }
+
+    // 3. Search Functionality
+    document.getElementById('search-bar').addEventListener('keyup', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = allMedicines.filter(med => 
+            med.name.toLowerCase().includes(query) || 
+            med.category.toLowerCase().includes(query)
+        );
+        renderMedicines(filtered);
+    });
+
+    // 4. Add to Cart Logic
+    function addToCart(id, name, price, image) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        const existingItem = cart.find(item => item.id === id);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+            showToast(`Increased quantity of ${name}`, "info");
+        } else {
+            cart.push({ id, name, price, image, quantity: 1 });
+            showToast(`${name} added to cart!`, "success");
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+    }
+
+    // 5. NEW: Buy Now Logic
+    function buyNow(id, name, price, image) {
+        // Add to cart first
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const existingItem = cart.find(item => item.id === id);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ id, name, price, image, quantity: 1 });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Redirect directly to checkout
+        window.location.href = 'checkout.html';
+    }
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const badge = document.querySelector('.cart-count');
+        if(badge) badge.innerText = totalItems;
+    }
+
+    function logout() {
+        localStorage.removeItem('user');
+        localStorage.removeItem('cart'); 
+        window.location.href = 'login.html';
+    }
+
+    // CHECK FOR WELCOME ANIMATION
+function checkWelcomeAnimation() {
+    const overlay = document.getElementById('welcome-overlay');
+
+    // Only run if the flag exists (set during login)
+    if (sessionStorage.getItem('showWelcome')) {
+        overlay.style.display = 'flex'; // Show it
+
+        // Remove flag so it doesn't show on refresh
+        sessionStorage.removeItem('showWelcome');
+
+        // Wait 2.5 seconds, then fade out
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+            // Completely remove from DOM after fade
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 1000); 
+        }, 2500);
+    }
+}
+
+// Call this immediately
+checkWelcomeAnimation();
+    loadProducts();
+</script>
+</body>
+</html>

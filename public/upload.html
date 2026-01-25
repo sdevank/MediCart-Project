@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - Upload Prescription</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">MediCart <span>+</span></div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="#" class="active">Upload</a></li>
+        </ul>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <h2>Upload Prescription</h2>
+            <p class="upload-desc">
+                Upload a clear photo of your prescription. Our pharmacists will review it and prepare your order.
+            </p>
+            
+            <form id="upload-form">
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" class="form-input" required placeholder="Enter patient name" title="Patient Name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Upload Image</label>
+                    <input type="file" id="file-input" name="image" class="form-input" accept="image/*" required 
+                           title="Upload prescription image" placeholder="Choose image file">
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Notes (Optional)</label>
+                    <textarea class="form-input" rows="3" title="Additional Notes" placeholder="Enter any additional notes (optional)"></textarea>
+                </div>
+
+                <button type="submit" class="auth-btn">Submit Prescription</button>
+            </form>
+            
+            <div id="success-msg" class="success-msg">
+                <p>Upload Successful! We will contact you shortly.</p>
+                <a href="home.html" class="back-home-link">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('file-input');
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]); // Append the file
+
+            // Show loading state
+            const btn = document.querySelector('.auth-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.getElementById('upload-form').style.display = 'none';
+                    document.getElementById('success-msg').style.display = 'block';
+                    // Use showToast logic here
+                    showToast("Prescription uploaded successfully!", "success");
+                } else {
+                    showToast("Upload failed. Please try again.", "error");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                showToast("Server error. Check connection.", "error");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

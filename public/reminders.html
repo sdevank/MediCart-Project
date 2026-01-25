@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - Reminders</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">MediCart <span>+</span></div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="reminders.html" class="active">Reminders</a></li>
+        </ul>
+        <div class="nav-user">
+            <span id="user-display">Hello, User</span>
+            <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+    
+    <div id="toast-container"></div>
+
+    <div class="auth-wrapper">
+        <div class="auth-container reminder-form-container">
+            <h2>Set Reminder</h2>
+            <form id="reminder-form">
+                <div class="form-group">
+                    <label>Medicine Name</label>
+                    <input type="text" id="med-name" class="form-input" placeholder="e.g. Paracetamol" required>
+                </div>
+                <div class="form-group">
+                    <label>Dosage</label>
+                    <input type="text" id="med-dose" class="form-input" placeholder="e.g. 1 Tablet" required>
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" id="med-time" class="form-input" required title="Select time for reminder" placeholder="Select time">
+                </div>
+                <button type="submit" class="auth-btn">Add Reminder</button>
+            </form>
+        </div>
+
+        <div class="auth-container reminders-container">
+            <h2>My Reminders</h2>
+            <div id="reminder-list">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) window.location.href = 'login.html';
+        document.getElementById('user-display').innerText = `Hello, ${user.firstName}`;
+
+        // 1. Fetch Reminders
+        async function loadReminders() {
+            const list = document.getElementById('reminder-list');
+            try {
+                // Ensure server.js was updated to include user.email in login!
+                if(!user.email) {
+                    list.innerHTML = "<p style='color:red;'>Please Logout and Login again to enable this feature.</p>";
+                    return;
+                }
+
+                const res = await fetch(`/api/reminders/${user.email}`);
+                const reminders = await res.json();
+
+                list.innerHTML = '';
+                if(reminders.length === 0) {
+                    list.innerHTML = '<p>No reminders set.</p>';
+                    return;
+                }
+
+                reminders.forEach(rem => {
+                    const item = `
+                        <div class="cart-item" style="justify-content: space-between;">
+                            <div>
+                                <h4 style="margin:0;">${rem.medicineName}</h4>
+                                <p style="margin:5px 0; color:#666;">
+                                    <i class="fas fa-pills"></i> ${rem.dosage} at 
+                                    <span style="font-weight:bold; color:#2ecc71;">${rem.time}</span>
+                                </p>
+                            </div>
+                            <button class="remove-btn" onclick="deleteReminder('${rem._id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    list.innerHTML += item;
+                });
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = "<p>Error loading reminders.</p>";
+            }
+        }
+
+        // 2. Add Reminder
+        document.getElementById('reminder-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newReminder = {
+                userEmail: user.email,
+                medicineName: document.getElementById('med-name').value,
+                dosage: document.getElementById('med-dose').value,
+                time: document.getElementById('med-time').value
+            };
+
+            try {
+                const res = await fetch('/api/reminders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newReminder)
+                });
+                
+                if(res.ok) {
+                    showToast("Reminder Set!", "success");
+                    loadReminders(); // Refresh list
+                    e.target.reset(); // Clear form
+                }
+            } catch (err) {
+                showToast("Failed to save.", "error");
+            }
+        });
+
+        // 3. Delete Reminder
+        async function deleteReminder(id) {
+            if(!confirm("Remove this reminder?")) return;
+            
+            await fetch(`/api/reminders/${id}`, { method: 'DELETE' });
+            showToast("Reminder removed", "info");
+            loadReminders();
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('cart');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize
+        loadReminders();
+    </script>
+</body>
+</html>

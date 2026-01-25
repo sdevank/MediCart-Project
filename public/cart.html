@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>MediCart - Shopping Cart</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">MediCart <span>+</span></div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="#" class="active">Cart</a></li>
+        </ul>
+        <div class="nav-user">
+            <a href="home.html" class="nav-link"> <i class="fas fa-arrow-left"></i> Continue Shopping</a>
+        </div>
+    </nav>
+
+    <div id="toast-container"></div>
+
+    <div class="cart-wrapper">
+        <div class="cart-list" id="cart-container">
+            </div>
+
+        <div class="cart-summary">
+            <h3>Order Summary</h3>
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="sub-total">₹0</span>
+            </div>
+            <div class="summary-row">
+                <span>Delivery Fee</span>
+                <span>₹40</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total Amount</span>
+                <span id="final-total">₹0</span>
+            </div>
+            <button class="checkout-btn" onclick="processCheckout()">Secure Checkout</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. POPUP ALERT SYSTEM (Toast) ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- 2. CART LOGIC ---
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const container = document.getElementById('cart-container');
+            const subTotalEl = document.getElementById('sub-total');
+            const finalTotalEl = document.getElementById('final-total');
+            
+            container.innerHTML = '';
+            let subTotal = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 40px;">
+                        <i class="fas fa-shopping-basket" style="font-size: 3rem; color:#ddd; margin-bottom:15px;"></i>
+                        <p>Your cart is empty.</p>
+                        <button class="auth-btn" style="width:auto; margin-top:10px;" onclick="window.location.href='home.html'">Start Shopping</button>
+                    </div>`;
+                subTotalEl.innerText = "₹0";
+                finalTotalEl.innerText = "₹0";
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                subTotal += item.price * item.quantity;
+
+                const itemHTML = `
+                    <div class="cart-item">
+                        <img src="${item.image}" alt="${item.name}" class="item-img">
+                        <div class="item-details">
+                            <h4>${item.name}</h4>
+                            <span class="price">₹${item.price}</span>
+                        </div>
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                        </div>
+                        <button class="remove-btn" onclick="removeItem(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.innerHTML += itemHTML;
+            });
+
+            // Update Summary
+            subTotalEl.innerText = `₹${subTotal}`;
+            finalTotalEl.innerText = `₹${subTotal + 40}`; // Adding fixed delivery fee
+        }
+
+        function updateQty(index, change) {
+            let cart = JSON.parse(localStorage.getItem('cart'));
+            
+            if (cart[index].quantity + change > 0) {
+                cart[index].quantity += change;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                loadCart();
+            }
+        }
+
+        function removeItem(index) {
+            let cart = JSON.parse(localStorage.getItem('cart'));
+            const removedItem = cart[index].name;
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            loadCart();
+            showToast(`${removedItem} removed from cart`, 'info');
+        }
+
+        function processCheckout() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                showToast("Your cart is empty!", "error");
+                return;
+            }
+            window.location.href = 'checkout.html';
+            // Simulate processing
+            const btn = document.querySelector('.checkout-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                showToast("Order placed successfully!", "success");
+                localStorage.removeItem('cart'); // Clear cart
+                loadCart(); // Refresh view
+                btn.innerHTML = 'Secure Checkout';
+                btn.disabled = false;
+                
+                // Optional: Redirect to order success page
+                // window.location.href = 'success.html';
+            }, 2000);
+        }
+
+        // Initialize
+        loadCart();
+    </script>
+</body>
+</html>

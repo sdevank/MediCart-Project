@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* specific admin styles */
+        .admin-container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h3 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; color: #2c3e50; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { background-color: #f8f9fa; color: #333; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .pending { background: #ffeeba; color: #856404; }
+        
+        .delete-btn { color: #e74c3c; cursor: pointer; border: none; background: none; }
+        .delete-btn:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="background-color: #2c3e50;">
+        <div class="logo">MediCart <span>Admin</span></div>
+        <div class="nav-user">
+            <a href="home.html" style="color: white; margin-right: 20px;">View Shop</a>
+            <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div id="toast-container"></div>
+
+    <div class="admin-container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="admin-grid">
+            
+            <div class="panel">
+                <h3>Add New Medicine</h3>
+                <form id="add-product-form">
+                    <div class="form-group">
+                        <label>Medicine Name</label>
+                        <input type="text" id="p-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₹)</label>
+                        <input type="number" id="p-price" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="p-category" class="form-input">
+                            <option value="General">General</option>
+                            <option value="Pain Relief">Pain Relief</option>
+                            <option value="Supplements">Supplements</option>
+                            <option value="Syrup">Syrup</option>
+                            <option value="Devices">Medical Devices</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="text" id="p-image" class="form-input" value="https://via.placeholder.com/150" required>
+                        <small style="color:#666;">Tip: Use Google Image address</small>
+                    </div>
+                    <button type="submit" class="auth-btn">Add Product</button>
+                </form>
+
+                <h3 style="margin-top: 30px;">Manage Products</h3>
+                <div id="admin-product-list" style="max-height: 400px; overflow-y: auto;">
+                    </div>
+            </div>
+
+            <div class="panel">
+                <h3>Recent Orders</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 1. Fetch & Render All Orders
+        async function loadAdminOrders() {
+            const table = document.getElementById('orders-table');
+            try {
+                const res = await fetch('/api/orders/all'); // Ensure you added this route!
+                const orders = await res.json();
+                
+                table.innerHTML = '';
+                if(orders.length === 0) {
+                    table.innerHTML = '<tr><td colspan="5">No orders found.</td></tr>';
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const date = new Date(order.date).toLocaleDateString();
+                    // Create a string summary of items (e.g., "Aspirin x2, Gel x1")
+                    const itemSummary = order.items.map(i => `${i.name} x${i.quantity}`).join(', ');
+                    
+                    const row = `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${order.shippingAddress.fullName}<br><small>${order.userEmail}</small></td>
+                            <td>${itemSummary}</td>
+                            <td>₹${order.totalAmount}</td>
+                            <td><span class="status-badge pending">${order.status}</span></td>
+                        </tr>
+                    `;
+                    table.innerHTML += row;
+                });
+            } catch (err) {
+                console.error("Error loading orders", err);
+            }
+        }
+
+        // 2. Add Product Logic
+        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newProduct = {
+                name: document.getElementById('p-name').value,
+                price: document.getElementById('p-price').value,
+                category: document.getElementById('p-category').value,
+                image: document.getElementById('p-image').value
+            };
+
+            try {
+                const res = await fetch('/api/products/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newProduct)
+                });
+                
+                if (res.ok) {
+                    showToast("Product Added Successfully!", "success");
+                    e.target.reset();
+                    loadAdminProducts(); // Refresh list
+                } else {
+                    showToast("Failed to add product", "error");
+                }
+            } catch (err) {
+                showToast("Server error", "error");
+            }
+        });
+
+        // 3. Load & Delete Products
+        async function loadAdminProducts() {
+            const container = document.getElementById('admin-product-list');
+            const res = await fetch('/api/products');
+            const products = await res.json();
+            
+            container.innerHTML = '';
+            products.forEach(p => {
+                const item = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${p.image}" width="40" height="40" style="border-radius:4px;">
+                            <div><strong>${p.name}</strong><br><small>₹${p.price}</small></div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteProduct('${p._id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.innerHTML += item;
+            });
+        }
+
+        async function deleteProduct(id) {
+            if(!confirm("Permanently delete this product?")) return;
+            
+            await fetch(`/api/products/${id}`, { method: 'DELETE' });
+            showToast("Product deleted", "info");
+            loadAdminProducts();
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize Admin Page
+        loadAdminOrders();
+        loadAdminProducts();
+    </script>
+</body>
+</html>
