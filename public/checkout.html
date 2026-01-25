@@ -69,50 +69,88 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // 1. Gather Data
-    const user = JSON.parse(localStorage.getItem('user'));
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    if(!user) {
-        alert("Please login first!");
-        return;
-    }
+    <script src="script.js"></script>
 
-    const orderData = {
-        userEmail: user.email, // Using email to link user
-        items: cart,
-        totalAmount: parseFloat(document.getElementById('pay-amount').innerText.replace('₹', '')),
-        shippingAddress: {
-            fullName: document.querySelector('input[type="text"]').value, // Update selectors to match your IDs if needed
-            // (Ideally, add IDs to your input fields in checkout.html for better selection)
-            address: "Sample Address", // Placeholder: Add IDs to your inputs to capture real values
-            city: "Sample City"
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Load Cart & Calculate Total
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const payAmountEl = document.getElementById('pay-amount');
+
+        // Check if cart is empty
+        if (cart.length === 0) {
+            alert("Your cart is empty! Redirecting to shop...");
+            window.location.href = 'home.html';
+            return;
         }
-    };
 
-    // 2. Send to Backend
-    try {
-        const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        });
+        // Calculate Subtotal
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const total = subtotal + 40; // Add Delivery Fee
 
-        if (response.ok) {
-            localStorage.removeItem('cart'); // Clear cart
-            window.location.href = 'success.html';
-        } else {
-            alert("Order failed!");
+        // Update the Display
+        if(payAmountEl) {
+            payAmountEl.innerText = "₹" + total;
         }
-    } catch (error) {
-        console.error(error);
-        alert("Server error");
-    }
-});
-    </script>
+
+        // 2. Handle Form Submit
+        const checkoutForm = document.getElementById('checkout-form');
+        if(checkoutForm) {
+            checkoutForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const user = JSON.parse(localStorage.getItem('user'));
+                
+                // Check if user is logged in
+                if (!user || !user.email) {
+                    alert("Session expired. Please login again.");
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const btn = document.querySelector('.auth-btn');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                btn.disabled = true;
+
+                // Gather data
+                const orderData = {
+                    userEmail: user.email,
+                    items: cart,
+                    totalAmount: total,
+                    shippingAddress: {
+                        fullName: document.getElementById('ship-name').value,
+                        phone: document.getElementById('ship-phone').value,
+                        address: document.getElementById('ship-address').value,
+                        city: document.getElementById('ship-city').value,
+                        zip: document.getElementById('ship-zip').value
+                    }
+                };
+
+                try {
+                    const response = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
+                    });
+
+                    if (response.ok) {
+                        localStorage.removeItem('cart'); // Clear cart
+                        window.location.href = 'success.html';
+                    } else {
+                        const errorMsg = await response.json();
+                        alert("Order Failed: " + (errorMsg.message || "Unknown error"));
+                        btn.innerHTML = 'Pay Now';
+                        btn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Server connection error");
+                    btn.innerHTML = 'Pay Now';
+                    btn.disabled = false;
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
