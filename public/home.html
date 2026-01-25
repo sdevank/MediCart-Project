@@ -168,22 +168,25 @@
     // CHECK FOR WELCOME ANIMATION
 function checkWelcomeAnimation() {
     const overlay = document.getElementById('welcome-overlay');
+    
+    // Check if the flag exists (Set during login)
+    if (sessionStorage.getItem('showWelcome') === 'true') {
+        
+        //Show the animation
+        overlay.style.display = 'flex'; 
+        
+        //Remove the flag IMMEDIATELY so it never plays again in this session
+        sessionStorage.removeItem('showWelcome'); 
 
-    // Only run if the flag exists (set during login)
-    if (sessionStorage.getItem('showWelcome')) {
-        overlay.style.display = 'flex'; // Show it
-
-        // Remove flag so it doesn't show on refresh
-        sessionStorage.removeItem('showWelcome');
-
-        // Wait 2.5 seconds, then fade out
+        //Play fade out logic
         setTimeout(() => {
             overlay.style.opacity = '0';
-            // Completely remove from DOM after fade
             setTimeout(() => {
                 overlay.style.display = 'none';
             }, 1000); 
         }, 2500);
+    } else {
+        if(overlay) overlay.style.display = 'none';
     }
 }
 
