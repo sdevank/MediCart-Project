@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const Reminder = require('../models/Reminder');
+const Reminder = require('../models/reminder_temp');
 
 // 1. Add Reminder
 router.post('/', async (req, res) => {
