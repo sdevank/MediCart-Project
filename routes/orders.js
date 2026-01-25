@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const Order = require('../models/orders_temp');
+const Order = require('../models/order');
 // 0. Get ALL Orders (Admin only)
 router.get('/all', async (req, res) => {
     try {
