@@ -38,18 +38,62 @@
         </div>
     </nav>
 
-    <header class="hero">
-        <div class="hero-text">
-            <h1>Your Health, Our Priority</h1>
-            <p>Order medicines online and get them delivered to your doorstep.</p>
-            <button class="cta-btn" onclick="window.location.href='upload.html'">Upload Prescription</button>
+    <header class="hero reveal">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Your Health,<br><span class="highlight">Our Priority</span></h1>
+                <p>Order 100% genuine medicines online and get them securely delivered directly to your doorstep.</p>
+                
+                <div class="hero-features">
+                    <span><i class="fas fa-truck"></i> Fast Delivery</span>
+                    <span><i class="fas fa-shield-alt"></i> Genuine Meds</span>
+                    <span><i class="fas fa-headset"></i> 24/7 Support</span>
+                </div>
+            </div>
+            
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=800&auto=format&fit=crop" alt="Pharmacy and Medicine">
+            </div>
         </div>
     </header>
 
-    <h2 class="section-title">Popular Medicines</h2>
+    <section class="popular-medicines-section">
+        <div class="section-header">
+            <h2 class="section-title reveal" style="text-align: center; margin-top: 40px;">Popular Medicines</h2>
+    
     <div class="product-grid" id="product-list">
         </div> 
+    </section> 
 
+    <footer class="footer reveal">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>MediCart <span>+</span></h3>
+                <p>Your trusted online pharmacy. Order medicines, upload prescriptions, set reminders, and consult our AI assistant anytime, anywhere.</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="reminders.html">Medicine Reminders</a></li>
+                    <li><a href="my-orders.html">My Orders</a></li>
+                    <li><a href="chatbot.html">AI Health Assistant</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-phone"></i> +91 9876543210</p>
+                <p><i class="fas fa-envelope"></i> support@medicart.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Kalyan, Maharashtra, India</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2026 MediCart. All rights reserved.</p>
+        </div>
+    </footer>
     <script src="script.js"></script>
 
 <script>
@@ -63,8 +107,8 @@
     }
 
     let allMedicines = []; 
-
-    // 2. Fetch & Render Medicines
+//render medicines on the page
+// 2. Fetch & Render Medicines
     async function loadProducts() {
         const productList = document.getElementById('product-list');
         try {
@@ -76,36 +120,43 @@
             productList.innerHTML = "<p>Failed to load medicines.</p>";
         }
     }
-
     function renderMedicines(medicines) {
-        const productList = document.getElementById('product-list');
-        productList.innerHTML = ''; 
+    const productList = document.getElementById('product-list');
+    productList.innerHTML = ''; 
 
-        if (medicines.length === 0) {
-            productList.innerHTML = '<p>No medicines found.</p>';
-            return;
-        }
-
-        medicines.forEach(med => {
-            const card = `
-                <div class="product-card">
-                    <img src="${med.image}" alt="${med.name}">
-                    <h3>${med.name}</h3>
-                    <p class="price">₹${med.price}</p>
-                    
-                    <div style="display: flex; justify-content: space-between;">
-                        <button class="add-btn" onclick="addToCart('${med._id}', '${med.name}', ${med.price}, '${med.image}')">
-                            Add
-                        </button>
-                        <button class="buy-btn" onclick="buyNow('${med._id}', '${med.name}', ${med.price}, '${med.image}')">
-                            Buy Now
-                        </button>
-                    </div>
-                </div>
-            `;
-            productList.innerHTML += card;
-        });
+    if (medicines.length === 0) {
+        productList.innerHTML = '<p>No medicines found.</p>';
+        return;
     }
+
+    medicines.forEach(med => {
+        // 1. Add an Rx icon if prescription is required
+        const rxBadge = med.requiresRx ? '<span style="color: #e74c3c; font-size: 0.8rem; font-weight: bold; margin-left: 5px;" title="Prescription Required">⚕️ Rx</span>' : '';
+        
+        // 2. Change the right button to "Upload Rx" if required
+        const actionButton = med.requiresRx 
+            ? `<button class="buy-btn" style="background-color: #c0392b;" onclick="window.location.href='upload.html'">Upload Rx</button>`
+            : `<button class="buy-btn" onclick="buyNow('${med._id}', '${med.name}', ${med.price}, '${med.image}')">Buy Now</button>`;
+
+        const card = `
+            <div class="product-card">
+                <span class="category-badge">${med.category}</span>
+                
+                <img src="${med.image}" alt="${med.name}">
+                <h3>${med.name} ${rxBadge}</h3>
+                <p class="price">₹${med.price}</p>
+                
+                <div style="display: flex; justify-content: space-between;">
+                    <button class="add-btn" onclick="addToCart('${med._id}', '${med.name}', ${med.price}, '${med.image}')">
+                        Add
+                    </button>
+                    ${actionButton}
+                </div>
+            </div>
+        `;
+        productList.innerHTML += card;
+    });
+}
 
     // 3. Search Functionality
     document.getElementById('search-bar').addEventListener('keyup', (e) => {
@@ -194,5 +245,26 @@ function checkWelcomeAnimation() {
 checkWelcomeAnimation();
     loadProducts();
 </script>
+<div class="floating-bot" onclick="window.location.href='chatbot.html'" title="Ask AI Assistant">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <script>
+        function revealOnScroll() {
+            var reveals = document.querySelectorAll('.reveal');
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100; // Triggers when element is 100px into view
+
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add('active');
+                }
+            }
+        }
+        window.addEventListener('scroll', revealOnScroll);
+        // Trigger once on load so elements at the top appear immediately
+        setTimeout(revealOnScroll, 100); 
+    </script>
 </body>
 </html>
