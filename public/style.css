@@ -814,3 +814,112 @@ label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
     70% { box-shadow: 0 0 0 20px rgba(52, 152, 219, 0); }
     100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
 }
+/* =========================================
+   PREMIUM LOGIN / SIGNUP UPGRADES
+   ========================================= */
+
+/* 1. Beautiful Medical-Themed Background */
+.auth-page-bg {
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.7) 0%, rgba(52, 152, 219, 0.6) 100%),
+                url('https://images.unsplash.com/photo-1576091160550-2173ff9e5ee5?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 2. Glassmorphism Container */
+.glass-wrapper .auth-container {
+    background: rgba(255, 255, 255, 0.9); /* Frosty white */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    padding: 50px 40px;
+    border-radius: 20px;
+    max-width: 420px;
+}
+
+/* Logo & Headings */
+.auth-logo {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+.auth-logo span { color: #e74c3c; }
+.glass-wrapper h2 { margin-bottom: 5px; color: #1a252f; font-size: 1.5rem; }
+.auth-subtitle { color: #7f8c8d; font-size: 0.95rem; margin-bottom: 30px; }
+
+/* 3. Input Fields with Icons */
+.icon-input {
+    position: relative;
+    margin-bottom: 25px;
+}
+.icon-input i:not(.toggle-eye) {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #95a5a6;
+    font-size: 1.1rem;
+    z-index: 2;
+}
+.icon-input .form-input {
+    padding-left: 45px; /* Pushes text right to make room for icon */
+    height: 52px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    border: 2px solid #ecf0f1;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+.icon-input .form-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.15);
+    background: #fff;
+}
+
+/* Fix eye icon centering */
+.icon-input .toggle-eye {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* 4. Forgot Password Link */
+.forgot-password-link {
+    text-align: right;
+    margin-bottom: 25px;
+    margin-top: -15px;
+}
+.forgot-password-link a {
+    color: #3498db;
+    font-size: 0.85rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+.forgot-password-link a:hover { color: #2980b9; }
+
+/* 5. Glowing Login Button */
+.glow-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    height: 52px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    transition: all 0.3s ease;
+}
+.glow-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.6);
+}
+
+/* 6. Smooth Entrance Animation */
+.fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
