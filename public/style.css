@@ -923,3 +923,33 @@ label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
     from { opacity: 0; transform: translateY(40px); }
     to { opacity: 1; transform: translateY(0); }
 }
+/* =========================================
+   NAVBAR HOVER & ACTIVE EFFECTS
+   ========================================= */
+
+/* Base styling for all links */
+.nav-links a {
+    color: #bdc3c7; /* Light grayish-white for unselected links */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 1. The "Flash Color" Hover Effect */
+.nav-links a:hover {
+    color: #ffffff;
+    background-color: rgba(52, 152, 219, 0.2); /* Soft blue highlight */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5); /* Glowing text */
+    transform: translateY(-2px); /* Floats up slightly */
+}
+
+/* 2. The "Active Page" Solid Color Effect */
+.nav-links a.active {
+    color: #ffffff;
+    background-color: #3498db; /* Bright blue pill */
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); /* Glowing shadow */
+    pointer-events: none; /* Stops the hover effect on the active button */
+}

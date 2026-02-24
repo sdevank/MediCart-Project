@@ -7,97 +7,97 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <nav class="navbar">
+<body class="auth-page-bg"> <nav class="navbar" style="position: relative;">
         <div class="logo">MediCart <span>+</span></div>
+        <div class="nav-user">
+            <a href="cart.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Back to Cart</a>
+        </div>
     </nav>
 
-    <div class="auth-wrapper">
-        <div class="auth-container checkout-container">
-            <h2 class="checkout-title">Secure Checkout</h2>
+    <div class="auth-wrapper glass-wrapper" style="padding: 40px 20px;">
+        <div class="auth-container fade-in-up" style="max-width: 800px; width: 100%;">
             
-            <form id="checkout-form">
-                <h4 class="section-title">Shipping Address</h4>
-                <div class="form-row">
-                    <div class="form-group input-group">
-                        <label>Full Name</label>
-                        <input type="text" class="form-input" required placeholder="Enter your full name">
-                    </div>
-                    <div class="form-group input-group">
-                        <label>Mobile Number</label>
-                        <input type="tel" class="form-input" required placeholder="Enter your mobile number">
-                    </div>
-                </div>
-                <div class="form-group input-group">
-                    <label>Address</label>
-                    <input type="text" class="form-input" placeholder="House No, Street Name" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group input-group">
-                        <label>City</label>
-                        <input type="text" class="form-input" required placeholder="Enter your city">
-                    </div>
-                    <div class="form-group input-group">
-                        <label>Zip Code</label>
-                        <input type="text" class="form-input" required placeholder="Enter your zip code">
-                    </div>
-                </div>
-
-                <h4 class="payment-method-title">Payment Method</h4>
-                <div class="payment-method-box">
-                    <div class="form-group input-group">
-                        <label>Card Number</label>
-                        <input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19">
-                    </div>
+            <h2 style="color: #2c3e50; border-bottom: 2px dashed #bdc3c7; padding-bottom: 15px; margin-top: 0;">
+                <i class="fas fa-lock" style="color: #27ae60;"></i> Secure Checkout
+            </h2>
+            
+            <form id="checkout-form" style="display: flex; gap: 40px; flex-wrap: wrap; margin-top: 25px;">
+                
+                <div style="flex: 1; min-width: 300px;">
+                    <h4 style="color: #34495e; margin-bottom: 15px;"><i class="fas fa-truck" style="color: #3498db; margin-right: 8px;"></i>Shipping Details</h4>
+                    
                     <div class="form-row">
-                        <div class="form-group input-group">
-                            <label>Expiry</label>
-                            <input type="text" class="form-input" placeholder="MM/YY">
+                        <div class="form-group icon-input">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="chk-name" class="form-input" required placeholder="Full Name">
                         </div>
-                        <div class="form-group input-group">
-                            <label>CVV</label>
-                            <input type="password" class="form-input" placeholder="123" maxlength="3">
+                        <div class="form-group icon-input">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="chk-phone" class="form-input" required placeholder="Mobile Number">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group icon-input">
+                        <i class="fas fa-home"></i>
+                        <input type="text" id="chk-address" class="form-input" placeholder="House No, Street Name" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group icon-input">
+                            <i class="fas fa-city"></i>
+                            <input type="text" id="chk-city" class="form-input" required placeholder="City">
+                        </div>
+                        <div class="form-group icon-input">
+                            <i class="fas fa-map-pin"></i>
+                            <input type="text" id="chk-zip" class="form-input" required placeholder="Zip Code">
                         </div>
                     </div>
                 </div>
 
-                <div class="checkout-total">
-                    <h3>Total to Pay: <span id="pay-amount">₹0</span></h3>
-                    <button type="submit" class="auth-btn pay-btn">Pay Now</button>
+                <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.5); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.8);">
+                    <h4 style="color: #34495e; margin-bottom: 15px; margin-top: 0;"><i class="fas fa-credit-card" style="color: #3498db; margin-right: 8px;"></i>Payment Method</h4>
+                    
+                    <div class="form-group icon-input">
+                        <i class="far fa-credit-card"></i>
+                        <input type="text" class="form-input" placeholder="Card Number (0000 0000 0000 0000)" maxlength="19" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group icon-input">
+                            <i class="far fa-calendar-alt"></i>
+                            <input type="text" class="form-input" placeholder="MM/YY" required>
+                        </div>
+                        <div class="form-group icon-input">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" class="form-input" placeholder="CVV" maxlength="3" required>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #bdc3c7; text-align: center;">
+                        <h3 style="color: #2c3e50; font-size: 1.5rem; margin-bottom: 20px;">Total: <span id="pay-amount" style="color: #27ae60;">₹0</span></h3>
+                        <button type="submit" class="auth-btn glow-btn" style="font-size: 1.1rem;">Confirm & Pay</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-    // 1. CALCULATE TOTAL IMMEDIATELY WHEN PAGE LOADS
     document.addEventListener('DOMContentLoaded', () => {
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
         const payAmountEl = document.getElementById('pay-amount');
-
-        // Calculate Subtotal
         const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
-        // If cart is empty, total is 0. Otherwise, add ₹40 delivery fee.
         const total = subtotal > 0 ? subtotal + 40 : 0;
-
-        // Update the text on the screen
-        if(payAmountEl) {
-            payAmountEl.innerText = "₹" + total;
-        }
+        if(payAmountEl) payAmountEl.innerText = "₹" + total;
     });
 
-    // 2. HANDLE PAY NOW BUTTON
     document.getElementById('checkout-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const btn = document.querySelector('.auth-btn');
         const originalText = btn.innerText;
-
-        // Get the total we calculated earlier
         const totalText = document.getElementById('pay-amount').innerText.replace('₹', '');
 
-        // Validation
         const user = JSON.parse(localStorage.getItem('user'));
         if (!user || !user.email) {
             alert("Session expired. Please login again.");
@@ -114,11 +114,11 @@
             items: cart,
             totalAmount: parseFloat(totalText),
             shippingAddress: {
-                fullName: document.querySelector('input[placeholder="Enter your full name"]')?.value || "User",
-                phone: document.querySelector('input[placeholder="Enter your mobile number"]')?.value || "0000000000",
-                address: document.querySelector('input[placeholder="House No, Street Name"]')?.value || "Address",
-                city: document.querySelector('input[placeholder="Enter your city"]')?.value || "City",
-                zip: document.querySelector('input[placeholder="Enter your zip code"]')?.value || "000000"
+                fullName: document.getElementById('chk-name').value,
+                phone: document.getElementById('chk-phone').value,
+                address: document.getElementById('chk-address').value,
+                city: document.getElementById('chk-city').value,
+                zip: document.getElementById('chk-zip').value
             }
         };
 
@@ -131,20 +131,18 @@
 
             if (response.ok) {
                 localStorage.removeItem('cart');
-                window.location.href = 'success.html'; // Redirect to your success page
+                window.location.href = 'success.html'; 
             } else {
-                const errorData = await response.json();
-                alert("Order Failed: " + (errorData.message || "Server Error"));
+                alert("Order Failed. Please try again.");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         } catch (error) {
-            console.error(error);
-            alert("Connection Failed. Is the server running?");
+            alert("Connection Failed.");
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     });
-</script>,o9
+    </script>
 </body>
 </html>

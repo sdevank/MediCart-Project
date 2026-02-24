@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - My Orders</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Specific Styles for My Orders Page */
+        body {
+            background-color: #f4f7f6; /* Soft clinical background so white cards pop */
+        }
+        .order-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
+            border: 1px solid #ecf0f1;
+            transition: all 0.3s ease;
+        }
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-color: #3498db;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #f1f2f6;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .order-meta-title {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .order-meta-value {
+            font-weight: 800;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-top: 5px;
+            display: block;
+        }
+        .item-pill {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f1f2f6;
+        }
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        @media (max-width: 600px) {
+            .order-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">MediCart <span>+</span></div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="reminders.html">Reminders</a></li>
+            <li><a href="my-orders.html" class="active">My Orders</a></li>
+        </ul>
+        <div class="nav-user">
+            <span id="user-display">Hello, User</span>
+            <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="cart-wrapper fade-in-up" style="max-width: 900px; margin-top: 40px; min-height: 70vh;">
+        
+        <div class="section-header">
+            <h2 class="section-title">My Order History</h2>
+            <p class="section-subtitle">Track and review your past medicine purchases</p>
+        </div>
+        
+        <div id="orders-list">
+            <div style="text-align:center; padding: 50px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: #3498db;"></i>
+                <p style="margin-top: 15px; color: #7f8c8d; font-weight: 600;">Fetching your orders...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('user-display').innerText = `Hello, ${user.firstName}`;
+        }
+
+        async function loadMyOrders() {
+            const container = document.getElementById('orders-list');
+            
+            try {
+                if (!user.email) {
+                    container.innerHTML = "<p>Please re-login to view orders.</p>";
+                    return;
+                }
+
+                const response = await fetch(`/api/orders/${user.email}`);
+                const orders = await response.json();
+
+                container.innerHTML = '';
+
+                // BEAUTIFUL EMPTY STATE
+                if (orders.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:60px 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                            <div style="background: #f1f8ff; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                                <i class="fas fa-box-open" style="font-size:3rem; color:#3498db;"></i>
+                            </div>
+                            <h3 style="color: #2c3e50; margin-bottom: 10px;">No Orders Yet</h3>
+                            <p style="color: #7f8c8d; margin-bottom: 25px;">Looks like you haven't placed any medicine orders yet.</p>
+                            <button class="auth-btn glow-btn" style="width:auto; padding: 0 30px;" onclick="window.location.href='home.html'">Start Shopping</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // RENDER ORDERS WITH PREMIUM UI
+                orders.reverse().forEach(order => {
+                    const date = new Date(order.date).toLocaleDateString('en-IN', {
+                        day: 'numeric', month: 'short', year: 'numeric'
+                    });
+                    
+                    let itemsHtml = '';
+                    order.items.forEach(item => {
+                        itemsHtml += `
+                            <li class="item-pill">
+                                <span style="font-weight: 600;">${item.name}</span>
+                                <span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">Qty: ${item.quantity}</span>
+                            </li>
+                        `;
+                    });
+
+                    const card = `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div>
+                                    <span class="order-meta-title">Order Placed</span>
+                                    <span class="order-meta-value"><i class="far fa-calendar-alt" style="color:#3498db; margin-right:6px;"></i> ${date}</span>
+                                </div>
+                                <div style="text-align: center;">
+                                    <span class="order-meta-title">Total Amount</span>
+                                    <span class="order-meta-value" style="color:#27ae60; font-size: 1.3rem;">₹${order.totalAmount}</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="order-meta-title" style="margin-bottom: 5px; display: block;">Status</span>
+                                    <span class="status-badge pending" style="background:#e8f4fd; color:#3498db; padding:6px 15px; border-radius:20px; font-size:0.85rem; font-weight: bold;">
+                                        <i class="fas fa-circle-notch fa-spin" style="margin-right: 5px; font-size: 0.75rem;"></i> ${order.status}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <h4 style="margin: 0 0 15px 0; color:#34495e; font-size: 1.05rem;"><i class="fas fa-shopping-bag" style="color:#95a5a6; margin-right:8px;"></i>Items Ordered</h4>
+                            <ul class="item-grid">
+                                ${itemsHtml}
+                            </ul>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = "<p style='text-align: center; color: #e74c3c;'>Failed to load orders. Please check your connection.</p>";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        loadMyOrders();
+    </script>
+</body>
+</html>

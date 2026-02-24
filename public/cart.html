@@ -3,66 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>MediCart - Shopping Cart</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-
-    <nav class="navbar">
+<body style="background-color: #f4f7f6;"> <nav class="navbar">
         <div class="logo">MediCart <span>+</span></div>
         <ul class="nav-links">
             <li><a href="home.html">Home</a></li>
-            <li><a href="#" class="active">Cart</a></li>
+            <li><a href="reminders.html">Reminders</a></li>
+            <li><a href="my-orders.html">My Orders</a></li> 
+            <li><a href="chatbot.html">Chatbot</a></li>
         </ul>
         <div class="nav-user">
-            <a href="home.html" class="nav-link"> <i class="fas fa-arrow-left"></i> Continue Shopping</a>
+            <a href="home.html" class="nav-link" style="color: white; font-weight: bold; text-decoration: none;"> 
+                <i class="fas fa-arrow-left"></i> Continue Shopping
+            </a>
         </div>
     </nav>
 
     <div id="toast-container"></div>
 
-    <div class="cart-wrapper">
-        <div class="cart-list" id="cart-container">
-            </div>
+    <div class="cart-wrapper fade-in-up">
+        
+        <div class="cart-list" id="cart-container" style="border: 1px solid #ecf0f1; border-radius: 15px;">
+        </div>
 
-        <div class="cart-summary">
-            <h3>Order Summary</h3>
+        <div class="cart-summary" style="border: 1px solid #ecf0f1; border-radius: 15px;">
+            <h3 style="margin-top: 0; color: #2c3e50; border-bottom: 2px dashed #eee; padding-bottom: 15px;">Order Summary</h3>
             <div class="summary-row">
                 <span>Subtotal</span>
-                <span id="sub-total">₹0</span>
+                <span id="sub-total" style="font-weight: 600; color: #2c3e50;">₹0</span>
             </div>
             <div class="summary-row">
                 <span>Delivery Fee</span>
-                <span>₹40</span>
+                <span style="font-weight: 600; color: #2c3e50;">₹40</span>
             </div>
             <div class="summary-row total">
                 <span>Total Amount</span>
-                <span id="final-total">₹0</span>
+                <span id="final-total" style="color: #27ae60; font-size: 1.4rem;">₹0</span>
             </div>
-            <button class="checkout-btn" onclick="processCheckout()">Secure Checkout</button>
+            <button class="checkout-btn glow-btn" onclick="processCheckout()">Secure Checkout <i class="fas fa-lock" style="margin-left: 5px;"></i></button>
         </div>
     </div>
 
     <script>
-        // --- 1. POPUP ALERT SYSTEM (Toast) ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
+            if(!container) return;
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `<span>${message}</span>`;
-            
             container.appendChild(toast);
-
-            // Remove after 3 seconds
             setTimeout(() => {
                 toast.style.animation = 'fadeOut 0.3s ease-out forwards';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // --- 2. CART LOGIC ---
         function loadCart() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const container = document.getElementById('cart-container');
@@ -74,29 +72,33 @@
 
             if (cart.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding: 40px;">
-                        <i class="fas fa-shopping-basket" style="font-size: 3rem; color:#ddd; margin-bottom:15px;"></i>
-                        <p>Your cart is empty.</p>
-                        <button class="auth-btn" style="width:auto; margin-top:10px;" onclick="window.location.href='home.html'">Start Shopping</button>
+                    <div style="text-align:center; padding: 60px 20px;">
+                        <div style="background: #f1f8ff; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                            <i class="fas fa-shopping-cart" style="font-size: 3rem; color:#3498db;"></i>
+                        </div>
+                        <h3 style="color: #2c3e50;">Your cart is empty</h3>
+                        <p style="color: #7f8c8d; margin-bottom: 20px;">Looks like you haven't added any medicines yet.</p>
+                        <button class="auth-btn glow-btn" style="width:auto; padding: 0 30px;" onclick="window.location.href='home.html'">Start Shopping</button>
                     </div>`;
                 subTotalEl.innerText = "₹0";
                 finalTotalEl.innerText = "₹0";
+                document.querySelector('.checkout-btn').disabled = true;
+                document.querySelector('.checkout-btn').style.opacity = '0.5';
                 return;
             }
 
             cart.forEach((item, index) => {
                 subTotal += item.price * item.quantity;
-
                 const itemHTML = `
-                    <div class="cart-item">
-                        <img src="${item.image}" alt="${item.name}" class="item-img">
+                    <div class="cart-item" style="transition: all 0.3s; padding: 20px;">
+                        <img src="${item.image}" alt="${item.name}" class="item-img" style="border: 1px solid #eee;">
                         <div class="item-details">
-                            <h4>${item.name}</h4>
-                            <span class="price">₹${item.price}</span>
+                            <h4 style="font-size: 1.1rem;">${item.name}</h4>
+                            <span class="price" style="color: #27ae60; font-weight: bold; font-size: 1.1rem;">₹${item.price}</span>
                         </div>
                         <div class="qty-control">
                             <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
-                            <span>${item.quantity}</span>
+                            <span style="font-weight: bold; width: 20px; text-align: center;">${item.quantity}</span>
                             <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
                         </div>
                         <button class="remove-btn" onclick="removeItem(${index})">
@@ -107,14 +109,14 @@
                 container.innerHTML += itemHTML;
             });
 
-            // Update Summary
             subTotalEl.innerText = `₹${subTotal}`;
-            finalTotalEl.innerText = `₹${subTotal + 40}`; // Adding fixed delivery fee
+            finalTotalEl.innerText = `₹${subTotal + 40}`; 
+            document.querySelector('.checkout-btn').disabled = false;
+            document.querySelector('.checkout-btn').style.opacity = '1';
         }
 
         function updateQty(index, change) {
             let cart = JSON.parse(localStorage.getItem('cart'));
-            
             if (cart[index].quantity + change > 0) {
                 cart[index].quantity += change;
                 localStorage.setItem('cart', JSON.stringify(cart));
@@ -127,36 +129,14 @@
             const removedItem = cart[index].name;
             cart.splice(index, 1);
             localStorage.setItem('cart', JSON.stringify(cart));
-            
             loadCart();
-            showToast(`${removedItem} removed from cart`, 'info');
+            showToast(`${removedItem} removed`, 'info');
         }
 
         function processCheckout() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart.length === 0) {
-                showToast("Your cart is empty!", "error");
-                return;
-            }
             window.location.href = 'checkout.html';
-            // Simulate processing
-            const btn = document.querySelector('.checkout-btn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
-
-            setTimeout(() => {
-                showToast("Order placed successfully!", "success");
-                localStorage.removeItem('cart'); // Clear cart
-                loadCart(); // Refresh view
-                btn.innerHTML = 'Secure Checkout';
-                btn.disabled = false;
-                
-                // Optional: Redirect to order success page
-                // window.location.href = 'success.html';
-            }, 2000);
         }
 
-        // Initialize
         loadCart();
     </script>
 </body>
