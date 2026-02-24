@@ -44,8 +44,9 @@ app.post('/login', async (req, res) => {
         
         // 1. Find user
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ error: "Invalid email or password" });
+        // STOP UNVERIFIED USERS
+        if (user && !user.isVerified) {
+            return res.status(401).json({ error: "Account not verified. Please sign up again to receive a new OTP." });
         }
 
         // 2. Compare the plain text password with the hashed password in DB

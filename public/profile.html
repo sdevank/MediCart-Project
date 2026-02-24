@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - My Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 15px auto;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+            border: 4px solid white;
+        }
+        .profile-name {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            font-weight: 800;
+            margin: 0;
+        }
+        .profile-status {
+            color: #27ae60;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        /* Make inputs look like clean data displays instead of editable boxes */
+        .readonly-input {
+            background: rgba(255,255,255,0.6) !important;
+            color: #2c3e50;
+            font-weight: 600;
+            cursor: default;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body class="auth-page-bg">
+
+    <nav class="navbar">
+        <div class="logo">MediCart <span>+</span></div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="reminders.html">Reminders</a></li>
+            <li><a href="my-orders.html">My Orders</a></li> 
+            <li><a href="chatbot.html">Chatbot</a></li>
+        </ul>
+        <div class="nav-user">
+            <a href="#" class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <div id="toast-container"></div>
+
+    <div class="auth-wrapper glass-wrapper" style="padding: 40px 20px;">
+        <div class="auth-container fade-in-up" style="max-width: 500px; width: 100%;">
+            
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 class="profile-name" id="display-name">Loading...</h2>
+                <div class="profile-status"><i class="fas fa-check-circle"></i> Verified Account</div>
+            </div>
+
+            <div class="form-group icon-input">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="pro-email" class="form-input readonly-input" readonly>
+            </div>
+
+            <div class="form-group icon-input">
+                <i class="fas fa-phone"></i>
+                <input type="text" id="pro-phone" class="form-input readonly-input" readonly>
+            </div>
+
+            <div class="action-buttons">
+                <button class="auth-btn glow-btn" style="flex: 1;" onclick="window.location.href='my-orders.html'">
+                    <i class="fas fa-shopping-bag" style="margin-right: 5px;"></i> My Orders
+                </button>
+                <button class="auth-btn" style="flex: 1; background: #e74c3c;" onclick="logout()">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Logout
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        if (!user) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(`/api/auth/user/${user.email}`);
+                if (response.ok) {
+                    const userData = await response.json();
+                    
+                    // Populate the UI with the database info
+                    document.getElementById('display-name').innerText = `${userData.firstName} ${userData.lastName}`;
+                    document.getElementById('pro-email').value = userData.email;
+                    document.getElementById('pro-phone').value = userData.phone;
+                } else {
+                    showToast("Failed to load profile data", "error");
+                }
+            } catch (error) {
+                console.error("Profile load error:", error);
+                showToast("Connection error", "error");
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('cart');
+            window.location.href = 'login.html';
+        }
+
+        // Fetch data as soon as the page loads
+        loadProfile();
+    </script>
+</body>
+</html>
