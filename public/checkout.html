@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="auth-page-bg"> <nav class="navbar" style="position: relative;">
+<body class="auth-page-bg">
+
+    <nav class="navbar" style="position: relative;">
         <div class="logo">MediCart <span>+</span></div>
         <div class="nav-user">
             <a href="cart.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Back to Cart</a>
@@ -33,7 +35,11 @@
                         </div>
                         <div class="form-group icon-input">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" id="chk-phone" class="form-input" required placeholder="Mobile Number">
+                            <input type="tel" id="chk-phone" class="form-input" placeholder="Mobile Number (10 Digits)" required 
+                                   pattern="[0-9]{10}" 
+                                   maxlength="10" 
+                                   oninvalid="this.setCustomValidity('Please enter a valid 10-digit phone number')"
+                                   oninput="this.setCustomValidity(''); this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
                         </div>
                     </div>
                     
@@ -55,25 +61,46 @@
                 </div>
 
                 <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.5); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.8);">
-                    <h4 style="color: #34495e; margin-bottom: 15px; margin-top: 0;"><i class="fas fa-credit-card" style="color: #3498db; margin-right: 8px;"></i>Payment Method</h4>
+                    <h4 style="color: #34495e; margin-bottom: 15px; margin-top: 0;"><i class="fas fa-wallet" style="color: #3498db; margin-right: 8px;"></i>Payment Method</h4>
                     
-                    <div class="form-group icon-input">
-                        <i class="far fa-credit-card"></i>
-                        <input type="text" class="form-input" placeholder="Card Number (0000 0000 0000 0000)" maxlength="19" required>
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                        <label style="flex: 1; background: white; padding: 10px; border-radius: 8px; border: 2px solid #3498db; cursor: pointer; text-align: center; font-weight: bold; color: #2c3e50; transition: all 0.3s;" id="label-card">
+                            <input type="radio" name="pay-method" value="card" checked onchange="togglePayment('card')" style="display: none;">
+                            <i class="fas fa-credit-card" style="color: #3498db;"></i> Card
+                        </label>
+                        <label style="flex: 1; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; text-align: center; font-weight: bold; color: #7f8c8d; transition: all 0.3s;" id="label-upi">
+                            <input type="radio" name="pay-method" value="upi" onchange="togglePayment('upi')" style="display: none;">
+                            <i class="fas fa-qrcode" style="color: #27ae60;"></i> UPI
+                        </label>
                     </div>
-                    
-                    <div class="form-row">
+
+                    <div id="card-fields">
                         <div class="form-group icon-input">
-                            <i class="far fa-calendar-alt"></i>
-                            <input type="text" class="form-input" placeholder="MM/YY" required>
+                            <i class="far fa-credit-card"></i>
+                            <input type="text" class="form-input" placeholder="Card Number (0000 0000 0000 0000)" maxlength="19" required>
                         </div>
-                        <div class="form-group icon-input">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" class="form-input" placeholder="CVV" maxlength="3" required>
+                        
+                        <div class="form-row">
+                            <div class="form-group icon-input">
+                                <i class="far fa-calendar-alt"></i>
+                                <input type="text" class="form-input" placeholder="MM/YY" required>
+                            </div>
+                            <div class="form-group icon-input">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" class="form-input" placeholder="CVV" maxlength="3" required>
+                            </div>
                         </div>
                     </div>
 
-                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #bdc3c7; text-align: center;">
+                    <div id="upi-fields" style="display: none;">
+                        <div class="form-group icon-input">
+                            <i class="fas fa-at"></i>
+                            <input type="text" id="chk-upi" class="form-input" placeholder="Enter UPI ID (e.g. name@okhdfc)">
+                        </div>
+                        <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: -10px; margin-bottom: 15px; text-align: center;">Open your UPI app (GPay, PhonePe, Paytm) to approve the payment.</p>
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 2px dashed #bdc3c7; text-align: center;">
                         <h3 style="color: #2c3e50; font-size: 1.5rem; margin-bottom: 20px;">Total: <span id="pay-amount" style="color: #27ae60;">₹0</span></h3>
                         <button type="submit" class="auth-btn glow-btn" style="font-size: 1.1rem;">Confirm & Pay</button>
                     </div>
@@ -83,6 +110,7 @@
     </div>
 
     <script>
+    // --- LOAD CART TOTAL ---
     document.addEventListener('DOMContentLoaded', () => {
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
         const payAmountEl = document.getElementById('pay-amount');
@@ -91,6 +119,57 @@
         if(payAmountEl) payAmountEl.innerText = "₹" + total;
     });
 
+    // --- TOGGLE PAYMENT METHODS ---
+    function togglePayment(method) {
+        const cardFields = document.getElementById('card-fields');
+        const upiFields = document.getElementById('upi-fields');
+        const labelCard = document.getElementById('label-card');
+        const labelUpi = document.getElementById('label-upi');
+        
+        // Grab the inputs to manage the "required" attribute
+        const cardInputs = cardFields.querySelectorAll('input');
+        const upiInput = document.getElementById('chk-upi');
+
+        if (method === 'card') {
+            // Show Card, Hide UPI
+            cardFields.style.display = 'block';
+            upiFields.style.display = 'none';
+            
+            // Highlight Card Button
+            labelCard.style.border = '2px solid #3498db';
+            labelCard.style.background = 'white';
+            labelCard.style.color = '#2c3e50';
+            
+            // Dim UPI Button
+            labelUpi.style.border = '2px solid transparent';
+            labelUpi.style.background = 'rgba(255,255,255,0.5)';
+            labelUpi.style.color = '#7f8c8d';
+            
+            // Adjust required fields so the form doesn't block submission
+            cardInputs.forEach(input => input.required = true);
+            upiInput.required = false;
+        } else {
+            // Show UPI, Hide Card
+            cardFields.style.display = 'none';
+            upiFields.style.display = 'block';
+            
+            // Highlight UPI Button
+            labelUpi.style.border = '2px solid #27ae60';
+            labelUpi.style.background = 'white';
+            labelUpi.style.color = '#2c3e50';
+            
+            // Dim Card Button
+            labelCard.style.border = '2px solid transparent';
+            labelCard.style.background = 'rgba(255,255,255,0.5)';
+            labelCard.style.color = '#7f8c8d';
+            
+            // Adjust required fields
+            cardInputs.forEach(input => input.required = false);
+            upiInput.required = true;
+        }
+    }
+
+    // --- HANDLE CHECKOUT SUBMISSION ---
     document.getElementById('checkout-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         

@@ -37,7 +37,11 @@
 
                 <div class="form-group icon-input">
                     <i class="fas fa-phone"></i>
-                    <input type="tel" id="phone" class="form-input" placeholder="Phone Number" required>
+                    <input type="tel" id="phone" class="form-input" placeholder="Phone Number (10 Digits)" required 
+                           pattern="[0-9]{10}" 
+                           maxlength="10" 
+                           oninvalid="this.setCustomValidity('Please enter a valid 10-digit phone number')"
+                           oninput="this.setCustomValidity(''); this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
                 </div>
 
                 <div class="form-group icon-input password-wrapper">

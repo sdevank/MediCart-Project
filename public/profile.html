@@ -30,6 +30,7 @@
             color: #2c3e50;
             font-weight: 800;
             margin: 0;
+            text-transform: capitalize;
         }
         .profile-status {
             color: #27ae60;
@@ -41,7 +42,7 @@
         .readonly-input {
             background: rgba(255,255,255,0.6) !important;
             color: #2c3e50;
-            font-weight: 600;
+            font-weight: 700;
             cursor: default;
         }
         .action-buttons {
@@ -73,20 +74,22 @@
             
             <div class="profile-header">
                 <div class="profile-avatar">
-                    <i class="fas fa-user"></i>
+                    <i class="fas fa-user-check"></i>
                 </div>
                 <h2 class="profile-name" id="display-name">Loading...</h2>
-                <div class="profile-status"><i class="fas fa-check-circle"></i> Verified Account</div>
+                <div class="profile-status"><i class="fas fa-shield-alt"></i> Verified Account</div>
             </div>
 
+            <label style="color: #7f8c8d; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block; text-align: left;">Email Address</label>
             <div class="form-group icon-input">
                 <i class="fas fa-envelope"></i>
-                <input type="email" id="pro-email" class="form-input readonly-input" readonly>
+                <input type="email" id="pro-email" class="form-input readonly-input" readonly placeholder="Fetching email...">
             </div>
 
+            <label style="color: #7f8c8d; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block; text-align: left;">Mobile Number</label>
             <div class="form-group icon-input">
                 <i class="fas fa-phone"></i>
-                <input type="text" id="pro-phone" class="form-input readonly-input" readonly>
+                <input type="text" id="pro-phone" class="form-input readonly-input" readonly placeholder="Fetching phone number...">
             </div>
 
             <div class="action-buttons">
@@ -94,7 +97,7 @@
                     <i class="fas fa-shopping-bag" style="margin-right: 5px;"></i> My Orders
                 </button>
                 <button class="auth-btn" style="flex: 1; background: #e74c3c;" onclick="logout()">
-                    <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Logout
+                    <i class="fas fa-power-off" style="margin-right: 5px;"></i> Logout
                 </button>
             </div>
 
@@ -103,38 +106,45 @@
 
     <script src="script.js"></script>
     <script>
+        // 1. Get the currently logged-in user's basic info from local storage
         const user = JSON.parse(localStorage.getItem('user'));
         
+        // If not logged in, kick them to login page
         if (!user) {
             window.location.href = 'login.html';
         }
 
+        // 2. Fetch the FULL profile details from the database
         async function loadProfile() {
             try {
+                // Calls the route we made in auth.js
                 const response = await fetch(`/api/auth/user/${user.email}`);
+                
                 if (response.ok) {
                     const userData = await response.json();
                     
-                    // Populate the UI with the database info
+                    // 3. Inject the data into the HTML elements!
                     document.getElementById('display-name').innerText = `${userData.firstName} ${userData.lastName}`;
                     document.getElementById('pro-email').value = userData.email;
                     document.getElementById('pro-phone').value = userData.phone;
                 } else {
                     showToast("Failed to load profile data", "error");
+                    document.getElementById('display-name').innerText = "Error Loading Profile";
                 }
             } catch (error) {
                 console.error("Profile load error:", error);
-                showToast("Connection error", "error");
+                showToast("Server connection error", "error");
             }
         }
 
+        // Handle Logout
         function logout() {
             localStorage.removeItem('user');
             localStorage.removeItem('cart');
             window.location.href = 'login.html';
         }
 
-        // Fetch data as soon as the page loads
+        // Run the fetch function as soon as the page opens!
         loadProfile();
     </script>
 </body>

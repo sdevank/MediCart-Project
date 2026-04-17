@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - Admin Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Give the Admin login a slightly different, secure look */
+        .admin-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="auth-page-bg">
+    
+    <div id="toast-container"></div> 
+    
+    <div class="auth-wrapper glass-wrapper">
+        <div class="auth-container fade-in-up" style="border-top: 5px solid #2c3e50;">
+            
+            <div class="admin-header"><i class="fas fa-user-shield"></i> Admin Portal</div>
+            <p class="auth-subtitle" style="margin-bottom: 30px;">Authorized personnel only.</p>
+
+            <form id="admin-login-form">
+                <div class="form-group icon-input">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="login-email" class="form-input" placeholder="Admin Email" required>
+                </div>
+
+                <div class="form-group icon-input password-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="login-password" class="form-input" placeholder="Admin Password" required>
+                    <i class="fas fa-eye toggle-eye" onclick="toggleVisibility('login-password', this)"></i>
+                </div>
+
+                <button type="submit" class="auth-btn glow-btn" style="background: linear-gradient(135deg, #2c3e50, #34495e); margin-top: 20px;">Secure Login</button>
+                
+                <div class="auth-links" style="margin-top: 20px;">
+                    <a href="home.html" style="color: #7f8c8d;"><i class="fas fa-arrow-left"></i> Back to Public Store</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Password visibility toggle
+        function toggleVisibility(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text"; 
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash"); 
+            } else {
+                input.type = "password"; 
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye"); 
+            }
+        }
+
+        // Admin Login Form Submission
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // STRICT CHECK: Make sure this is actually the Admin!
+                    if (data.user.isAdmin === true) {
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        showToast("Access Granted. Welcome Admin.", "success");
+                        
+                        setTimeout(() => {
+                            window.location.href = 'admin.html';
+                        }, 1000);
+                    } else {
+                        // If a normal user tries to log in here, kick them out
+                        showToast("Access Denied: You do not have Admin privileges.", "error");
+                    }
+                } else {
+                    showToast(data.message, "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Server connection failed.", "error");
+            }
+        });
+    </script>
+</body>
+</html>

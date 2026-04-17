@@ -6,14 +6,104 @@
     <title>MediCart - Home</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- CIRCULAR COLORED CATEGORY CARDS STYLES --- */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+            padding: 0 40px;
+        }
+        
+        .category-card {
+            background: #99d9e0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+        }
+
+        /* The Round Pastel Background Box */
+        .category-img-box {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%; /* Makes the background a perfect circle */
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .category-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image fills the circle */
+            mix-blend-mode: multiply; /* Blends white image backgrounds with the pastel color! */
+            transition: transform 0.4s ease;
+        }
+
+        /* Hover Zoom Effect inside the circle */
+        .category-card:hover .category-img-box img {
+            transform: scale(1.15); 
+        }
+
+        .category-card h4 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Standard Grid layout for showing products inside a category or search */
+        .search-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto 40px auto;
+            padding: 0 40px;
+        }
+        
+        /* Back Button Style */
+        .back-cat-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-right: 15px;
+            transition: transform 0.2s;
+        }
+        .back-cat-btn:hover {
+            transform: translateX(-5px);
+            color: #2980b9;
+        }
+    </style>
 </head>
 <body>
     <div id="welcome-overlay">
-    <div class="welcome-content">
-        <div class="welcome-text">Welcome to MediCart</div>
-        <div class="welcome-subtext">Your Health, Our Priority</div>
+        <div class="welcome-content">
+            <div class="welcome-text">Welcome to MediCart</div>
+            <div class="welcome-subtext">Your Health, Our Priority</div>
+        </div>
     </div>
-</div>
+    
     <nav class="navbar">
         <div class="logo">MediCart <span>+</span></div>
         <ul class="nav-links">
@@ -29,9 +119,7 @@
 
         <div class="nav-user">
             <a href="profile.html" id="user-display" style="color: white; text-decoration: none; font-weight: bold; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#3498db'" onmouseout="this.style.color='white'">Hello, User</a>
-            
             <a href="#" class="logout-btn" onclick="logout()">Logout</a>
-            
             <a href="cart.html">
                 <div class="cart-icon">
                     <i class="fas fa-shopping-cart"></i>
@@ -61,10 +149,14 @@
     </header>
 
     <section class="popular-medicines-section">
-        <div class="section-header">
-            <h2 class="section-title reveal" style="text-align: center; margin-top: 40px;">Popular Medicines</h2>
-    
-    <div class="product-grid" id="product-list">
+        <div class="section-header" style="text-align: center; margin-top: 40px; display: flex; justify-content: center; align-items: center;">
+            <h2 class="section-title reveal" id="main-heading" style="margin: 0; display: flex; align-items: center;">Shop by Category</h2>
+        </div>
+        
+        <div id="product-container" style="margin-top: 30px;">
+            <div style="text-align:center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: #3498db;"></i>
+            </div>
         </div> 
     </section> 
 
@@ -74,7 +166,6 @@
                 <h3>MediCart <span>+</span></h3>
                 <p>Your trusted online pharmacy. Order medicines, upload prescriptions, set reminders, and consult our AI assistant anytime, anywhere.</p>
             </div>
-
             <div class="footer-section">
                 <h3>Quick Links</h3>
                 <ul>
@@ -84,7 +175,6 @@
                     <li><a href="chatbot.html">AI Health Assistant</a></li>
                 </ul>
             </div>
-
             <div class="footer-section">
                 <h3>Contact Us</h3>
                 <p><i class="fas fa-phone"></i> +91 9876543210</p>
@@ -92,163 +182,241 @@
                 <p><i class="fas fa-map-marker-alt"></i> Kalyan, Maharashtra, India</p>
             </div>
         </div>
-        
         <div class="footer-bottom">
             <p>&copy; 2026 MediCart. All rights reserved.</p>
         </div>
     </footer>
+
     <script src="script.js"></script>
+    <script>
+        // 1. Check Auth 
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userDisplay = document.getElementById('user-display');
+        const logoutBtn = document.querySelector('.logout-btn');
 
-<script>
-    // 1. Check Auth
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
-        window.location.href = 'login.html';
-    } else {
-        document.getElementById('user-display').innerText = `Hello, ${user.firstName}`;
-        updateCartCount(); 
-    }
-
-    let allMedicines = []; 
-//render medicines on the page
-// 2. Fetch & Render Medicines
-    async function loadProducts() {
-        const productList = document.getElementById('product-list');
-        try {
-            const response = await fetch('/api/products');
-            allMedicines = await response.json();
-            renderMedicines(allMedicines); 
-        } catch (error) {
-            console.error("Error loading products:", error);
-            productList.innerHTML = "<p>Failed to load medicines.</p>";
+        if (!user) {
+            userDisplay.innerText = "Login / Sign Up";
+            userDisplay.href = "login.html";
+            if(logoutBtn) logoutBtn.style.display = 'none';
+        } else {
+            userDisplay.innerText = `Hello, ${user.firstName}`;
+            userDisplay.href = "profile.html";
+            if(logoutBtn) logoutBtn.style.display = 'inline-block';
+            updateCartCount(); 
         }
-    }
-    function renderMedicines(medicines) {
-    const productList = document.getElementById('product-list');
-    productList.innerHTML = ''; 
 
-    if (medicines.length === 0) {
-        productList.innerHTML = '<p>No medicines found.</p>';
-        return;
-    }
+        let allMedicines = []; 
 
-    medicines.forEach(med => {
-        // 1. Add an Rx icon if prescription is required
-        const rxBadge = med.requiresRx ? '<span style="color: #e74c3c; font-size: 0.8rem; font-weight: bold; margin-left: 5px;" title="Prescription Required">⚕️ Rx</span>' : '';
-        
-        // 2. Change the right button to "Upload Rx" if required
-        const actionButton = med.requiresRx 
-            ? `<button class="buy-btn" style="background-color: #c0392b;" onclick="window.location.href='upload.html'">Upload Rx</button>`
-            : `<button class="buy-btn" onclick="buyNow('${med._id}', '${med.name}', ${med.price}, '${med.image}')">Buy Now</button>`;
+        // 2. Fetch Medicines
+        async function loadProducts() {
+            const productContainer = document.getElementById('product-container');
+            try {
+                const response = await fetch('/api/products');
+                allMedicines = await response.json();
+                renderCategories(); // Initially render the Category View
+            } catch (error) {
+                console.error("Error loading products:", error);
+                productContainer.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Failed to load medicines.</p>";
+            }
+        }
 
-        const card = `
-            <div class="product-card">
-                <span class="category-badge">${med.category}</span>
-                
-                <img src="${med.image}" alt="${med.name}">
-                <h3>${med.name} ${rxBadge}</h3>
-                <p class="price">₹${med.price}</p>
-                
-                <div style="display: flex; justify-content: space-between;">
-                    <button class="add-btn" onclick="addToCart('${med._id}', '${med.name}', ${med.price}, '${med.image}')">
-                        Add
-                    </button>
-                    ${actionButton}
+        // --- RENDER CIRCULAR COLORED CATEGORY CARDS ---
+        function renderCategories() {
+            const productContainer = document.getElementById('product-container');
+            const mainHeading = document.getElementById('main-heading');
+            mainHeading.innerHTML = 'Shop by Category'; // Reset title
+
+            if (allMedicines.length === 0) {
+                productContainer.innerHTML = '<p style="text-align:center; padding: 40px; color: #7f8c8d; font-size: 1.2rem;">No medicines found.</p>';
+                return;
+            }
+
+            const categorized = {};
+            allMedicines.forEach(med => {
+                const cat = med.category || "General";
+                if (!categorized[cat]) categorized[cat] = [];
+                categorized[cat].push(med);
+            });
+
+            // Specific High-Quality Images for the Categories
+            const categoryImages = {
+                "Pain Relief": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300&h=300&fit=crop",
+                "Supplements": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=300&h=300&fit=crop",
+                "Syrup": "https://images.unsplash.com/photo-1628771065518-0d82f1938462?w=300&h=300&fit=crop",
+                "Diabetes": "https://images.unsplash.com/photo-1576086213369-97a306d36557?w=300&h=300&fit=crop",
+                "Safety": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=300&h=300&fit=crop",
+                "General": "https://images.unsplash.com/photo-1584362917165-526a968579e8?w=300&h=300&fit=crop"
+            };
+
+            // Pastel Background Colors Array
+            const pastelColors = ['#fde3e9', '#e3f2fd', '#e8f5e9', '#fff3e0', '#f3e5f5', '#e0f7fa'];
+            let colorIndex = 0;
+
+            // Build the Grid of Circular Cards with Pastel Backgrounds
+            let html = '<div class="categories-grid">';
+            for (const category in categorized) {
+                const thumbnailImg = categoryImages[category] || categorized[category][0].image; 
+                const bgColor = pastelColors[colorIndex % pastelColors.length];
+                colorIndex++;
+
+                html += `
+                    <div class="category-card" onclick="showCategoryProducts('${category}')">
+                        <div class="category-img-box" style="background-color: ${bgColor};">
+                            <img src="${thumbnailImg}" alt="${category}">
+                        </div>
+                        <h4>${category}</h4>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            productContainer.innerHTML = html;
+        }
+
+        // --- RENDER SPECIFIC CATEGORY PRODUCTS ---
+        function showCategoryProducts(categoryName) {
+            const productContainer = document.getElementById('product-container');
+            const mainHeading = document.getElementById('main-heading');
+            
+            // Add the "Back" arrow to the title
+            mainHeading.innerHTML = `
+                <button class="back-cat-btn" onclick="renderCategories()"><i class="fas fa-arrow-left"></i></button>
+                ${categoryName}
+            `;
+
+            // Filter products that match the clicked category
+            const filteredProducts = allMedicines.filter(med => med.category === categoryName);
+            
+            // Render them using the standard grid
+            let gridHtml = '<div class="search-results-grid">';
+            filteredProducts.forEach(med => { gridHtml += generateCardHTML(med); });
+            gridHtml += '</div>';
+            
+            productContainer.innerHTML = gridHtml;
+        }
+
+        // --- PRODUCT CARD HTML GENERATOR ---
+        function generateCardHTML(med) {
+            const rxBadge = med.requiresRx ? '<span style="color: #e74c3c; font-size: 0.8rem; font-weight: bold; margin-left: 5px;" title="Prescription Required">⚕️ Rx</span>' : '';
+            
+            const currentStock = med.stock || 0;
+            const isOutOfStock = currentStock <= 0;
+            const stockDisplay = isOutOfStock 
+                ? `<p style="color: #e74c3c; font-weight: bold; font-size: 0.85rem; margin: 5px 0;">Out of Stock</p>`
+                : `<p style="color: #27ae60; font-weight: bold; font-size: 0.85rem; margin: 5px 0;">In Stock: ${currentStock}</p>`;
+
+            const disableAttr = isOutOfStock ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
+
+            const actionButton = med.requiresRx 
+                ? `<button class="buy-btn" style="background-color: #c0392b;" ${disableAttr} onclick="requireUpload('${med._id}', '${med.name.replace(/'/g, "\\'")}', ${med.price}, '${med.image}')">Upload Rx</button>`
+                : `<button class="buy-btn" ${disableAttr} onclick="buyNow('${med._id}', '${med.name.replace(/'/g, "\\'")}', ${med.price}, '${med.image}')">Buy Now</button>`;
+
+            const addButton = med.requiresRx 
+                ? `<button class="add-btn" ${disableAttr} onclick="requireUpload('${med._id}', '${med.name.replace(/'/g, "\\'")}', ${med.price}, '${med.image}')">Add</button>`
+                : `<button class="add-btn" ${disableAttr} onclick="addToCart('${med._id}', '${med.name.replace(/'/g, "\\'")}', ${med.price}, '${med.image}')">Add</button>`;
+
+            return `
+                <div class="product-card">
+                    <img src="${med.image}" alt="${med.name}">
+                    <h3 style="font-size: 1.05rem; margin: 0 0 5px 0;">${med.name} ${rxBadge}</h3>
+                    ${stockDisplay}
+                    <p class="price" style="margin-top:auto;">₹${med.price}</p>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        ${addButton}
+                        ${actionButton}
+                    </div>
                 </div>
-            </div>
-        `;
-        productList.innerHTML += card;
-    });
-}
-
-    // 3. Search Functionality
-    document.getElementById('search-bar').addEventListener('keyup', (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = allMedicines.filter(med => 
-            med.name.toLowerCase().includes(query) || 
-            med.category.toLowerCase().includes(query)
-        );
-        renderMedicines(filtered);
-    });
-
-    // 4. Add to Cart Logic
-    function addToCart(id, name, price, image) {
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        
-        const existingItem = cart.find(item => item.id === id);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
-            showToast(`Increased quantity of ${name}`, "info");
-        } else {
-            cart.push({ id, name, price, image, quantity: 1 });
-            showToast(`${name} added to cart!`, "success");
+            `;
         }
 
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartCount();
-    }
+        // --- SMART SEARCH FUNCTIONALITY ---
+        document.getElementById('search-bar').addEventListener('keyup', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const mainHeading = document.getElementById('main-heading');
+            const productContainer = document.getElementById('product-container');
 
-    // 5. NEW: Buy Now Logic
-    function buyNow(id, name, price, image) {
-        // Add to cart first
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const existingItem = cart.find(item => item.id === id);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({ id, name, price, image, quantity: 1 });
+            if (query === '') {
+                renderCategories(); // Go back to category grid if search is empty
+            } else {
+                mainHeading.innerHTML = "Search Results"; // Remove back button for search
+                const filtered = allMedicines.filter(med => 
+                    med.name.toLowerCase().includes(query) || 
+                    med.category.toLowerCase().includes(query)
+                );
+                
+                let gridHtml = '<div class="search-results-grid">';
+                filtered.forEach(med => { gridHtml += generateCardHTML(med); });
+                gridHtml += '</div>';
+                productContainer.innerHTML = gridHtml;
+            }
+        });
+
+        // --- CART HANDLERS ---
+        function addToCart(id, name, price, image) {
+            if (!user) { window.location.href = 'login.html'; return; }
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+                showToast(`Increased quantity of ${name}`, "info");
+            } else {
+                cart.push({ id, name, price, image, quantity: 1 });
+                showToast(`${name} added to cart!`, "success");
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
         }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        
-        // Redirect directly to checkout
-        window.location.href = 'checkout.html';
-    }
 
-    function updateCartCount() {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const badge = document.querySelector('.cart-count');
-        if(badge) badge.innerText = totalItems;
-    }
+        function buyNow(id, name, price, image) {
+            if (!user) { window.location.href = 'login.html'; return; }
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) existingItem.quantity += 1;
+            else cart.push({ id, name, price, image, quantity: 1 });
+            localStorage.setItem('cart', JSON.stringify(cart));
+            window.location.href = 'checkout.html';
+        }
 
-    function logout() {
-        localStorage.removeItem('user');
-        localStorage.removeItem('cart'); 
-        window.location.href = 'login.html';
-    }
+        function requireUpload(id, name, price, image) {
+            if (!user) { window.location.href = 'login.html'; return; }
+            const params = new URLSearchParams({ id, name, price, image });
+            window.location.href = `upload.html?${params.toString()}`;
+        }
 
-    // CHECK FOR WELCOME ANIMATION
-function checkWelcomeAnimation() {
-    const overlay = document.getElementById('welcome-overlay');
+        function updateCartCount() {
+            if (!user) return;
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.querySelector('.cart-count');
+            if(badge) badge.innerText = totalItems;
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('cart'); 
+            window.location.href = 'home.html';
+        }
+
+        function checkWelcomeAnimation() {
+            const overlay = document.getElementById('welcome-overlay');
+            if (sessionStorage.getItem('showWelcome') === 'true') {
+                overlay.style.display = 'flex'; 
+                sessionStorage.removeItem('showWelcome'); 
+                setTimeout(() => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.style.display = 'none', 1000); 
+                }, 2500);
+            } else {
+                if(overlay) overlay.style.display = 'none';
+            }
+        }
+
+        checkWelcomeAnimation();
+        loadProducts();
+    </script>
     
-    // Check if the flag exists (Set during login)
-    if (sessionStorage.getItem('showWelcome') === 'true') {
-        
-        //Show the animation
-        overlay.style.display = 'flex'; 
-        
-        //Remove the flag IMMEDIATELY so it never plays again in this session
-        sessionStorage.removeItem('showWelcome'); 
-
-        //Play fade out logic
-        setTimeout(() => {
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 1000); 
-        }, 2500);
-    } else {
-        if(overlay) overlay.style.display = 'none';
-    }
-}
-
-// Call this immediately
-checkWelcomeAnimation();
-    loadProducts();
-</script>
-<div class="floating-bot" onclick="window.location.href='chatbot.html'" title="Ask AI Assistant">
+    <div class="floating-bot" onclick="window.location.href='chatbot.html'" title="Ask AI Assistant">
         <i class="fas fa-robot"></i>
     </div>
 
@@ -258,16 +426,13 @@ checkWelcomeAnimation();
             for (var i = 0; i < reveals.length; i++) {
                 var windowHeight = window.innerHeight;
                 var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 100; // Triggers when element is 100px into view
-
-                if (elementTop < windowHeight - elementVisible) {
+                if (elementTop < windowHeight - 100) {
                     reveals[i].classList.add('active');
                 }
             }
         }
         window.addEventListener('scroll', revealOnScroll);
-        // Trigger once on load so elements at the top appear immediately
         setTimeout(revealOnScroll, 100); 
     </script>
 </body>
-</html>
+</html>    

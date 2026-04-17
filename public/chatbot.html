@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCart - AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .chat-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+            border: 1px solid #ecf0f1;
+        }
+        .chat-header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .chat-header i { font-size: 2rem; }
+        .chat-header h2 { margin: 0; font-size: 1.5rem; }
+        .chat-header p { margin: 5px 0 0 0; color: #bdc3c7; font-size: 0.9rem; }
+        
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease-in;
+        }
+        .bot-message {
+            background: white;
+            color: #2c3e50;
+            border: 1px solid #ecf0f1;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .user-message {
+            background: #3498db;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.2);
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ecf0f1;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        .chat-input:focus { border-color: #3498db; }
+        .send-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .send-btn:hover { background: #2980b9; transform: scale(1.05); }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: white;
+            padding: 12px 18px;
+            border-radius: 20px;
+            border: 1px solid #ecf0f1;
+            border-bottom-left-radius: 5px;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="auth-page-bg">
+
+    <nav class="navbar">
+        <div class="logo">MediCart <span>+</span></div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="reminders.html">Reminders</a></li>
+            <li><a href="my-orders.html">My Orders</a></li> 
+            <li><a href="chatbot.html" class="active">Chatbot</a></li>
+        </ul>
+        <div class="nav-user">
+            <a href="home.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+        </div>
+    </nav>
+
+    <div class="chat-container fade-in-up">
+        <div class="chat-header">
+            <div style="background: white; color: #3498db; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <h2>MediCart AI Assistant</h2>
+            </div>
+        </div>
+
+        <div class="chat-box" id="chat-box">
+            <div class="message bot-message">
+                Hello! I am the MediCart AI Assistant. I can answer medical questions, explain prescriptions, or help you find products in our store. How can I help you today?
+            </div>
+            <div class="typing-indicator" id="typing-indicator">
+                <i class="fas fa-circle-notch fa-spin"></i> AI is thinking...
+            </div>
+        </div>
+
+        <form class="chat-input-area" id="chat-form">
+            <input type="text" id="user-input" class="chat-input" placeholder="Ask any medical or pharmacy question..." autocomplete="off" required>
+            <button type="submit" class="send-btn" title="Send Message"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const inputField = document.getElementById('user-input');
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            const chatBox = document.getElementById('chat-box');
+            const typingIndicator = document.getElementById('typing-indicator');
+
+            // 1. Add User Message to UI
+            const userMsgHtml = `<div class="message user-message">${message}</div>`;
+            typingIndicator.insertAdjacentHTML('beforebegin', userMsgHtml);
+            inputField.value = ''; // clear input
+            
+            // 2. Show "Thinking" animation & scroll to bottom
+            typingIndicator.style.display = 'block';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // 3. Send message to your new AI Backend
+                const response = await fetch('/api/chatbot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+
+                // 4. Hide "Thinking" and show AI response
+                typingIndicator.style.display = 'none';
+                
+                // Convert Markdown bold (**text**) to HTML bold (<b>text</b>) for a prettier display
+                const formattedReply = data.reply.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+                const botMsgHtml = `<div class="message bot-message">${formattedReply}</div>`;
+                typingIndicator.insertAdjacentHTML('beforebegin', botMsgHtml);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                const errorMsgHtml = `<div class="message bot-message" style="color:#e74c3c;">Connection error. Please try again later.</div>`;
+                typingIndicator.insertAdjacentHTML('beforebegin', errorMsgHtml);
+            }
+        });
+    </script>
+</body>
+</html>

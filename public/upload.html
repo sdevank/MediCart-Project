@@ -5,88 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediCart - Upload Prescription</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
+<body class="auth-page-bg">
+
     <nav class="navbar">
         <div class="logo">MediCart <span>+</span></div>
-        <ul class="nav-links">
-            <li><a href="home.html">Home</a></li>
-            <li><a href="#" class="active">Upload</a></li>
-        </ul>
+        <div class="nav-user">
+            <a href="home.html" style="color: white; text-decoration: none; font-weight: bold;">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+        </div>
     </nav>
 
-    <div class="auth-wrapper">
-        <div class="auth-container">
-            <h2>Upload Prescription</h2>
-            <p class="upload-desc">
-                Upload a clear photo of your prescription. Our pharmacists will review it and prepare your order.
-            </p>
+    <div id="toast-container"></div>
+
+    <div class="auth-wrapper glass-wrapper">
+        <div class="auth-container fade-in-up" style="max-width: 500px; text-align: center;">
             
+            <i class="fas fa-file-medical" style="font-size: 3.5rem; color: #3498db; margin-bottom: 15px;"></i>
+            <h2 style="color: #2c3e50; margin-bottom: 5px;">Upload Prescription</h2>
+            <p class="auth-subtitle" style="margin-bottom: 10px;">Required for medicines marked with <b style="color:#e74c3c;">⚕️ Rx</b></p>
+            
+            <div id="target-med-box" style="display: none; background: #e8f4fd; padding: 10px; border-radius: 8px; border: 1px dashed #3498db; margin-bottom: 25px; color: #2c3e50; font-weight: bold;">
+                <i class="fas fa-pills" style="color: #3498db; margin-right: 5px;"></i> Unlocking: <span id="target-med-name"></span>
+            </div>
+
             <form id="upload-form">
-                <div class="form-group">
-                    <label>Patient Name</label>
-                    <input type="text" class="form-input" required placeholder="Enter patient name" title="Patient Name">
-                </div>
-                
-                <div class="form-group">
-                    <label>Upload Image</label>
-                    <input type="file" id="file-input" name="image" class="form-input" accept="image/*" required 
-                           title="Upload prescription image" placeholder="Choose image file">
+                <div class="form-group" style="background: rgba(255,255,255,0.6); padding: 30px 20px; border: 2px dashed #3498db; border-radius: 15px; margin-bottom: 25px; transition: all 0.3s;">
+                    <label for="prescription-file">Upload your prescription:</label>
+                    <input type="file" id="prescription-file" accept="image/*,application/pdf" required title="Choose a file to upload">
                 </div>
 
-                <div class="form-group">
-                    <label>Additional Notes (Optional)</label>
-                    <textarea class="form-input" rows="3" title="Additional Notes" placeholder="Enter any additional notes (optional)"></textarea>
-                </div>
-
-                <button type="submit" class="auth-btn">Submit Prescription</button>
+                <button type="submit" class="auth-btn glow-btn" id="upload-btn" style="font-size: 1.1rem; background: linear-gradient(135deg, #e74c3c, #c0392b); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);">
+                    <i class="fas fa-cloud-upload-alt" style="margin-right: 8px;"></i> Verify & Add to Cart
+                </button>
             </form>
             
-            <div id="success-msg" class="success-msg">
-                <p>Upload Successful! We will contact you shortly.</p>
-                <a href="home.html" class="back-home-link">Back to Home</a>
-            </div>
         </div>
     </div>
 
+    <script src="script.js"></script>
     <script>
+        // 1. Read URL Parameters to see what medicine they want
+        const urlParams = new URLSearchParams(window.location.search);
+        const pendingItem = {
+            id: urlParams.get('id'),
+            name: urlParams.get('name'),
+            price: parseFloat(urlParams.get('price')),
+            image: urlParams.get('image'),
+            quantity: 1
+        };
+
+        // If they came here for a specific medicine, display it!
+        if (pendingItem.name) {
+            document.getElementById('target-med-name').innerText = pendingItem.name;
+            document.getElementById('target-med-box').style.display = 'block';
+        }
+
+        // 2. Handle the Upload
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            e.preventDefault(); 
+            
+            const fileInput = document.getElementById('prescription-file');
+            const btn = document.getElementById('upload-btn');
+            const originalText = btn.innerHTML;
+            
+            if (!fileInput.files[0]) return;
 
-            const fileInput = document.getElementById('file-input');
             const formData = new FormData();
-            formData.append('image', fileInput.files[0]); // Append the file
+            formData.append('prescription', fileInput.files[0]);
 
-            // Show loading state
-            const btn = document.querySelector('.auth-btn');
-            const originalText = btn.innerText;
-            btn.innerText = "Uploading...";
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading & Verifying...';
             btn.disabled = true;
 
             try {
-                const response = await fetch('/api/upload', {
+                const res = await fetch('/api/upload', {
                     method: 'POST',
-                    body: formData
+                    body: formData 
                 });
 
-                if (response.ok) {
-                    document.getElementById('upload-form').style.display = 'none';
-                    document.getElementById('success-msg').style.display = 'block';
-                    // Use showToast logic here
-                    showToast("Prescription uploaded successfully!", "success");
+                const data = await res.json();
+
+                if (res.ok) {
+                    
+                    // 3. SECURE ADD TO CART: Only runs if upload succeeds!
+                    if (pendingItem.id) {
+                        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                        const existingItem = cart.find(item => item.id === pendingItem.id);
+                        if (existingItem) {
+                            existingItem.quantity += 1;
+                        } else {
+                            cart.push(pendingItem);
+                        }
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                        
+                        showToast("Prescription Verified! Medicine added to cart.", "success");
+                        setTimeout(() => window.location.href = 'cart.html', 2000);
+                    } else {
+                        // Fallback if they just uploaded without a specific medicine
+                        showToast("Prescription Uploaded Successfully!", "success");
+                        setTimeout(() => window.location.href = 'home.html', 2000);
+                    }
+
                 } else {
-                    showToast("Upload failed. Please try again.", "error");
-                    btn.innerText = originalText;
+                    showToast(data.message || "Upload failed", "error");
+                    btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
-            } catch (error) {
-                console.error(error);
-                showToast("Server error. Check connection.", "error");
-                btn.innerText = originalText;
+            } catch (err) {
+                showToast("Connection error. Try again.", "error");
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         });
     </script>
-    <script src="script.js"></script>
 </body>
 </html>

@@ -56,6 +56,40 @@
                 icon.classList.add("fa-eye"); 
             }
         }
+        // Normal User Login Form Submission Logic
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Save user data
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showToast(data.message, "success");
+                    
+                    // EVERYONE logging in here goes to the home page now
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 1000);
+
+                } else {
+                    showToast(data.message, "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Server connection failed.", "error");
+            }
+        });
     </script>
 </body>
 </html>

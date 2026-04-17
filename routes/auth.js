@@ -7,8 +7,8 @@ const User = require('../models/User');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'medicart76@gmail.com',  // <-- PUT YOUR GMAIL HERE
-        pass: 'saszezyzgfkjmueq'      // <-- PUT YOUR 16-DIGIT GMAIL APP PASSWORD HERE
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS      // <-- PUT YOUR 16-DIGIT GMAIL APP PASSWORD HERE
     }
 });
 
@@ -172,6 +172,42 @@ router.get('/user/:email', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
+    }
+});
+// 6. LOGIN ROUTE (HANDLES BOTH ADMIN AND NORMAL USERS)
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // A. Check if it is the Master Admin logging in
+        if (email === "admin@medicart.com" && password === "admin123") {
+            return res.status(200).json({ 
+                message: "Admin Login Successful!", 
+                user: { firstName: "Admin", email: "admin@medicart.com", isAdmin: true } 
+            });
+        }
+
+        // B. Otherwise, check for a normal user in the database
+        const User = require('../models/User'); // Ensure User model is loaded
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: "No account found with this email." });
+
+        // C. Ensure they verified their email via OTP
+        if (!user.isVerified) return res.status(400).json({ message: "Please verify your email using the OTP sent to you." });
+
+        // D. Check if password matches
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) return res.status(400).json({ message: "Invalid password." });
+
+        // E. Success! Send back normal user data
+        res.status(200).json({ 
+            message: "Login successful!", 
+            user: { firstName: user.firstName, lastName: user.lastName, email: user.email, isAdmin: false } 
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error during login" });
     }
 });
 module.exports = router;
