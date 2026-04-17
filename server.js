@@ -1,4 +1,6 @@
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 const orderRoute = require('./routes/orders');
 const reminderRoute = require('./routes/reminders');
 const productRoute = require('./routes/products');
