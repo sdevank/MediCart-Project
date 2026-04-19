@@ -83,53 +83,54 @@ const reminderTransporter = nodemailer.createTransport({
 });
 
 // This loop runs exactly once every 60,000 milliseconds (1 minute)
-setInterval(async () => {
-    try {
-        // 1. Get the current computer time in "HH:MM" 24-hour format
-        const now = new Date();
-        const currentHour = now.getHours().toString().padStart(2, '0');
-        const currentMinute = now.getMinutes().toString().padStart(2, '0');
-        const currentTime = `${currentHour}:${currentMinute}`;
+// setInterval(async () => {
+//     try {
+//         // 1. Get the current computer time in "HH:MM" 24-hour format
+//         const now = new Date();
+//         const currentHour = now.getHours().toString().padStart(2, '0');
+//         const currentMinute = now.getMinutes().toString().padStart(2, '0');
+//         const currentTime = `${currentHour}:${currentMinute}`;
 
-        // 2. Search the database for any active reminders matching THIS exact minute
-        const dueReminders = await Reminder.find({ time: currentTime, active: true });
+//         // 2. Search the database for any active reminders matching THIS exact minute
+//         const dueReminders = await Reminder.find({ time: currentTime, active: true });
 
-        // 3. Send an email for every reminder found
-        for (let reminder of dueReminders) {
-            const mailOptions = {
-                from: 'MediCart Reminders <syitdevank73@gmail.com>',
-                to: reminder.userEmail,
-                subject: `⏰ MediCart: Time to take your ${reminder.medicineName}!`,
-                html: `
-                    <div style="font-family: Arial, sans-serif; text-align: center; padding: 30px; border: 2px dashed #3498db; border-radius: 15px; max-width: 500px; margin: 0 auto; background-color: #f4f7f6;">
-                        <i style="font-size: 40px; color: #f39c12;">💊</i>
-                        <h2 style="color: #2c3e50;">Medicine Reminder!</h2>
-                        <p style="font-size: 1.1rem; color: #34495e;">Hello,</p>
-                        <p style="font-size: 1.1rem; color: #34495e;">It is time to take your scheduled medicine:</p>
+//         // 3. Send an email for every reminder found
+//         for (let reminder of dueReminders) {
+//             const mailOptions = {
+//                 from: 'MediCart Reminders <syitdevank73@gmail.com>',
+//                 to: reminder.userEmail,
+//                 subject: `⏰ MediCart: Time to take your ${reminder.medicineName}!`,
+//                 html: `
+//                     <div style="font-family: Arial, sans-serif; text-align: center; padding: 30px; border: 2px dashed #3498db; border-radius: 15px; max-width: 500px; margin: 0 auto; background-color: #f4f7f6;">
+//                         <i style="font-size: 40px; color: #f39c12;">💊</i>
+//                         <h2 style="color: #2c3e50;">Medicine Reminder!</h2>
+//                         <p style="font-size: 1.1rem; color: #34495e;">Hello,</p>
+//                         <p style="font-size: 1.1rem; color: #34495e;">It is time to take your scheduled medicine:</p>
                         
-                        <div style="background: white; padding: 15px; border-radius: 10px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                            <h1 style="color: #e74c3c; margin: 0;">${reminder.medicineName}</h1>
-                            <h3 style="color: #27ae60; margin: 10px 0 0 0;">Dosage: ${reminder.dosage}</h3>
-                        </div>
+//                         <div style="background: white; padding: 15px; border-radius: 10px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+//                             <h1 style="color: #e74c3c; margin: 0;">${reminder.medicineName}</h1>
+//                             <h3 style="color: #27ae60; margin: 10px 0 0 0;">Dosage: ${reminder.dosage}</h3>
+//                         </div>
                         
-                        <p style="color: #7f8c8d; font-size: 0.9rem;">Please mark it as taken in your MediCart dashboard.</p>
-                        <p style="color: #7f8c8d; font-size: 0.9rem; font-weight: bold;">Stay healthy,<br>The MediCart Team</p>
-                    </div>
-                `
-            };
+//                         <p style="color: #7f8c8d; font-size: 0.9rem;">Please mark it as taken in your MediCart dashboard.</p>
+//                         <p style="color: #7f8c8d; font-size: 0.9rem; font-weight: bold;">Stay healthy,<br>The MediCart Team</p>
+//                     </div>
+//                 `
+//             };
             
-            // Send it!
-            reminderTransporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.error("Failed to send reminder email:", error);
-                } else {
-                    console.log(`✅ Automated Reminder sent to ${reminder.userEmail} for ${reminder.medicineName} at ${currentTime}`);
-                }
-            });
-        }
-    } catch (err) {
-        console.error("Reminder System Error:", err);
-    }
-}, 60000); // 60000ms = 1 Minute
+//             // Send it!
+//             reminderTransporter.sendMail(mailOptions, (error, info) => {
+//                 if (error) {
+//                     console.error("Failed to send reminder email:", error);
+//                 } else {
+//                     console.log(`✅ Automated Reminder sent to ${reminder.userEmail} for ${reminder.medicineName} at ${currentTime}`);
+//                 }
+//             });
+//         }
+//     } catch (err) {
+//         console.error("Reminder System Error:", err);
+//     }
+// }, 60000); // 60000ms = 1 Minute
 //app.use('/api/auth', authRoute);
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+module.exports = app;
